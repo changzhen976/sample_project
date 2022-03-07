@@ -7773,6 +7773,7 @@ END GROUP
                 0x000000003fc8cda0       0x14 esp-idf/freertos/libfreertos.a(timers.c.obj)
  .bss.xStaticTimerQueue.4807
                 0x000000003fc8cdb4       0x54 esp-idf/freertos/libfreertos.a(timers.c.obj)
+ *(.ext_ram.bss .ext_ram.bss.*)
  *(.dynbss .dynsbss .gnu.linkonce.b .gnu.linkonce.b.* .gnu.linkonce.sb .gnu.linkonce.sb.* .gnu.linkonce.sb2 .gnu.linkonce.sb2.* .sbss .sbss.* .sbss2 .sbss2.* .scommon .share.mem)
  .sbss.s_app_elf_sha256.3874
                 0x000000003fc8ce08        0x8 esp-idf/app_update/libapp_update.a(esp_app_desc.c.obj)
@@ -7955,7 +7956,6 @@ END GROUP
                 0x000000003fc8cf80        0x4 esp-idf/app_update/libapp_update.a(esp_ota_ops.c.obj)
  .sbss          0x000000003fc8cf84        0x4 /home/user01/.espressif/tools/riscv32-esp-elf/esp-2021r2-8.4.0/riscv32-esp-elf/bin/../lib/gcc/riscv32-esp-elf/8.4.0/../../../../riscv32-esp-elf/lib/rv32imc/ilp32/libc.a(lib_a-environ.o)
                 0x000000003fc8cf84                environ
- *(.ext_ram.bss .ext_ram.bss.*)
  *(COMMON)
  COMMON         0x000000003fc8cf88        0x4 esp-idf/heap/libheap.a(heap_caps_init.c.obj)
                 0x000000003fc8cf88                registered_heaps
