@@ -330,7 +330,7 @@ void SemaBOp2(void *pvParameters)
 }
 
 /* Counting */
-void SemaBOp3(void *pvParameters)
+void SemaCOp1(void *pvParameters)
 {
 
     int CountingCnt;
@@ -351,7 +351,7 @@ void SemaBOp3(void *pvParameters)
         vTaskDelay(pdMS_TO_TICKS(2000));
     }
 }
-void SemaBOp4(void *pvParameters)
+void SemaCOp2(void *pvParameters)
 {
 
     int CountingCnt;
@@ -373,7 +373,58 @@ void SemaBOp4(void *pvParameters)
     }
 }
 /* Mutex */
+void SemaMOp1(void *pvParameters)
+{
 
+    BaseType_t iRet;
+    printf("mutex task1 begin!\n");
+    while (1)
+    {
+        iRet = xSemaphoreTake(xSemaphoreHand3, pdMS_TO_TICKS(1000));
+        if (iRet == pdPASS)
+        {
+            printf("mutex task1 take!\n");
+
+            for (int i = 0; i <= 10; i++)
+            {
+                Semaph_data3++;
+                printf("mutex task1 : %d!\n", Semaph_data3);
+                vTaskDelay(pdMS_TO_TICKS(200));
+            }
+            printf("mutex task1 give!\n");
+            xSemaphoreGive(xSemaphoreHand3);
+
+            // Semaph_data3
+        }
+    }
+}
+
+void SemaMOp2(void *pvParameters)
+{
+
+    BaseType_t iRet;
+    printf("mutex task1 begin!\n");
+    while (1)
+    {
+        iRet = xSemaphoreTake(xSemaphoreHand3, pdMS_TO_TICKS(1000));
+        if (iRet == pdPASS)
+        {
+            printf("mutex task2 take!\n");
+
+            for (int i = 0; i <= 10; i++)
+            {
+                Semaph_data3++;
+                printf("mutex task2 : %d!\n", Semaph_data3);
+                vTaskDelay(pdMS_TO_TICKS(200));
+            }
+            printf("mutex task2 give!\n");
+            xSemaphoreGive(xSemaphoreHand3);
+
+            vTaskDelay(pdMS_TO_TICKS(230));
+            // Semaph_data3
+        }
+    }
+}
 //===================================================================================================================
 //===================================================================================================================
 //===================================================================================================================
@@ -396,7 +447,7 @@ void app_main(void)
     }
     else
     {
-        //vTaskPrioritySet(xHandle1, 2); /* change task prioriry */
+        // vTaskPrioritySet(xHandle1, 2); /* change task prioriry */
         ESP_LOGI(TaskTAG, "task created! \n");
     }
 
@@ -532,7 +583,7 @@ void app_main(void)
     }
     else
     {
-        //vTaskPrioritySet(xHandle1, 2); /* change task prioriry */
+        // vTaskPrioritySet(xHandle1, 2); /* change task prioriry */
         ESP_LOGI("SemaphBinary", "task created! \n");
     }
 
@@ -550,7 +601,7 @@ void app_main(void)
     }
     else
     {
-        //vTaskPrioritySet(xHandle1, 2); /* change task prioriry */
+        // vTaskPrioritySet(xHandle1, 2); /* change task prioriry */
         ESP_LOGI("SemaphBinary", "task created! \n");
     }
 
@@ -562,40 +613,77 @@ void app_main(void)
 
     xSemaphoreGive(xSemaphoreHand2);
 
-    TaskHandle_t SemaBOp_3;
+    TaskHandle_t SemaCOp_1;
 
-    if (xTaskCreate(SemaBOp3,   /* callback function */
-                    "SemaBOp3", /* readable name */
+    if (xTaskCreate(SemaCOp1,   /* callback function */
+                    "SemaCOp1", /* readable name */
                     2048,       /* stack size */
                     NULL,       /* parameters */
                     1,          /* priority */
-                    &SemaBOp_3  /* task handle */
+                    &SemaCOp_1  /* task handle */
                     ) != pdPASS)
     {
         ESP_LOGE("SemaphCounting", "can't create task!");
     }
     else
     {
-        //vTaskPrioritySet(xHandle1, 2); /* change task prioriry */
+        // vTaskPrioritySet(xHandle1, 2); /* change task prioriry */
         ESP_LOGI("SemaphCounting", "task created! \n");
     }
 
-    TaskHandle_t SemaBOp_4;
+    TaskHandle_t SemaCOp_2;
 
-    if (xTaskCreate(SemaBOp4,   /* callback function */
-                    "SemaBOp4", /* readable name */
+    if (xTaskCreate(SemaCOp2,   /* callback function */
+                    "SemaCOp2", /* readable name */
                     2048,       /* stack size */
                     NULL,       /* parameters */
                     1,          /* priority */
-                    &SemaBOp_4  /* task handle */
+                    &SemaCOp_2  /* task handle */
                     ) != pdPASS)
     {
         ESP_LOGE("SemaphCounting", "can't create task!");
     }
     else
     {
-        //vTaskPrioritySet(xHandle1, 2); /* change task prioriry */
+        // vTaskPrioritySet(xHandle1, 2); /* change task prioriry */
         ESP_LOGI("SemaphCounting", "task created! \n");
     }
     /* Mutex */
+
+    xSemaphoreHand3 = xSemaphoreCreateMutex();
+
+    TaskHandle_t SemaMOp_1;
+
+    if (xTaskCreate(SemaMOp1,   /* callback function */
+                    "SemaMOp1", /* readable name */
+                    2048,       /* stack size */
+                    NULL,       /* parameters */
+                    2,          /* priority */
+                    &SemaMOp_1  /* task handle */
+                    ) != pdPASS)
+    {
+        ESP_LOGE("SemaphMutex", "can't create task!");
+    }
+    else
+    {
+        ESP_LOGI("SemaphMutex", "task created! \n");
+    }
+
+    TaskHandle_t SemaMOp_2;
+
+    if (xTaskCreate(SemaMOp2,   /* callback function */
+                    "SemaMOp2", /* readable name */
+                    2048,       /* stack size */
+                    NULL,       /* parameters */
+                    3,          /* priority */
+                    &SemaMOp_2  /* task handle */
+                    ) != pdPASS)
+    {
+        ESP_LOGE("SemaphMutex", "can't create task!");
+    }
+    else
+    {
+        // vTaskPrioritySet(xHandle1, 2); /* change task prioriry */
+        ESP_LOGI("SemaphMutex", "task created! \n");
+    }
 }
