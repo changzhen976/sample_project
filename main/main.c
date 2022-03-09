@@ -4,6 +4,7 @@
 #include "freertos/queue.h"
 #include "freertos/timers.h"
 #include "freertos/semphr.h"
+#include "freertos/event_groups.h"
 #include "esp_log.h"
 
 /*log tag define*/
@@ -388,7 +389,7 @@ void SemaMOp1(void *pvParameters)
             for (int i = 0; i <= 10; i++)
             {
                 Semaph_data3++;
-                printf("mutex task1 : %d!\n", Semaph_data3);
+                // printf("mutex task1 : %d!\n", Semaph_data3);
                 vTaskDelay(pdMS_TO_TICKS(200));
             }
             printf("mutex task1 give!\n");
@@ -414,7 +415,7 @@ void SemaMOp2(void *pvParameters)
             for (int i = 0; i <= 10; i++)
             {
                 Semaph_data3++;
-                printf("mutex task2 : %d!\n", Semaph_data3);
+                // printf("mutex task2 : %d!\n", Semaph_data3);
                 vTaskDelay(pdMS_TO_TICKS(200));
             }
             printf("mutex task2 give!\n");
@@ -425,6 +426,40 @@ void SemaMOp2(void *pvParameters)
         }
     }
 }
+//--------------------------------------------------------------------------------------------------------------------
+/* Event Group */
+#define BIT_0 (1 << 0)
+#define BIT_4 (1 << 4)
+
+EventGroupHandle_t EventGroup_Handle;
+
+void EventGroupHandleFuc1(void *pvParam)
+{
+    EventBits_t iBit = 0;
+    while (1)
+    {
+        xEventGroupWaitBits(EventGroup_Handle, /* EventGroup Handle */
+                            BIT_0 | BIT_4,     /* The bit within the event group to wait for */
+                            pdTRUE,            /* if clear bit before returning */
+                            pdTRUE,            /* if wait both bits */
+                            portMAX_DELAY);    /* timeout wait */
+        ESP_LOGI("EventGroup", "bit was set\n");
+    }
+}
+void EventGroupHandleFuc2(void *pvParam)
+{
+    while (1)
+    {
+        xEventGroupSetBits(EventGroup_Handle, BIT_0);
+        ESP_LOGI("EventGroup", "set bit0\n");
+
+        vTaskDelay(1000);
+        xEventGroupSetBits(EventGroup_Handle, BIT_4);
+        ESP_LOGI("EventGroup", "set bit4\n");
+
+        vTaskDelay(1000);
+    }
+}
 //===================================================================================================================
 //===================================================================================================================
 //===================================================================================================================
@@ -432,6 +467,7 @@ void SemaMOp2(void *pvParameters)
 void app_main(void)
 {
 
+    // vTaskSuspendAll();
     /*******task create********/
     TaskHandle_t xHandle1;
 
@@ -648,6 +684,7 @@ void app_main(void)
         // vTaskPrioritySet(xHandle1, 2); /* change task prioriry */
         ESP_LOGI("SemaphCounting", "task created! \n");
     }
+
     /* Mutex */
 
     xSemaphoreHand3 = xSemaphoreCreateMutex();
@@ -685,5 +722,34 @@ void app_main(void)
     {
         // vTaskPrioritySet(xHandle1, 2); /* change task prioriry */
         ESP_LOGI("SemaphMutex", "task created! \n");
+    }
+
+    // xTaskResumeAll();
+    //-------------------------------------------------------------------------------------------------------------------
+    /* Event Group */
+    EventGroup_Handle = xEventGroupCreate();
+    if (EventGroup_Handle == NULL)
+    {
+        ESP_LOGE("EventGroup", "can't create EventGroup!");
+    }
+    else
+    {
+        ESP_LOGI("EventGroup", "EventGroup created! \n");
+        xTaskCreate(EventGroupHandleFuc1,   /* callback function */
+                    "EventGroupHandleFuc1", /* readable name */
+                    2048,                   /* stack size */
+                    NULL,                   /* parameters */
+                    3,                      /* priority */
+                    NULL                    /* task handle */
+        );
+        xTaskCreate(EventGroupHandleFuc2,   /* callback function */
+                    "EventGroupHandleFuc2", /* readable name */
+                    2048,                   /* stack size */
+                    NULL,                   /* parameters */
+                    3,                      /* priority */
+                    NULL                    /* task handle */
+        );
+        // no reaction!!!!!
+        ////////////////////
     }
 }
